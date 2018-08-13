@@ -13,6 +13,7 @@ from sklearn.metrics import roc_auc_score, f1_score, confusion_matrix
 from sklearn.metrics import cohen_kappa_score, precision_score, recall_score
 from imblearn.over_sampling import SMOTE, ADASYN
 from scipy import sparse
+import xgboost as xgb
 np.random.seed(42)
 
 path = '/Users/ryankingery/desktop/suicides/data/'
@@ -29,7 +30,7 @@ def get_data(path):
     return text,labels
 
 def numericalize_data(text,labels):
-    count_vect = CountVectorizer()
+    count_vect = CountVectorizer(max_features=100000)
     count_vect.fit(text)
     X_counts_all = count_vect.fit_transform(text)
     tfidf_transformer = TfidfTransformer()
@@ -75,13 +76,17 @@ def train_subsamples(X_tfidf_all,y_all,runs=10,ratio=1):
                                                      test_size=0.1, random_state=41)   
     print('Training subsamples with ratio of '+str(ratio)+':1')
     for i in range(runs):
-        X_train,y_train = subsample(X_train,y_train,ratio)
-        if ratio>1:
-            #X_train,y_train = upsample(X_train,y_train)
-            X_train,y_train = SMOTE().fit_sample(X_train, y_train)
-            #X_train,y_train = ADASYN().fit_sample(X_train, y_train)
+        if ratio is not 'all':   
+            X_train,y_train = subsample(X_train,y_train,ratio)
+        #X_train,y_train = upsample(X_train,y_train)
+        X_train,y_train = SMOTE().fit_sample(X_train, y_train)
+        #X_train,y_train = ADASYN().fit_sample(X_train, y_train)
         
-        model = MultinomialNB()
+        #model = MultinomialNB()
+        #model = RandomForestClassifier(n_estimators=60,min_samples_leaf=13,random_state=2,
+        #                      max_features=.5,oob_score=True,n_jobs=-1)
+        model = xgb.XGBClassifier(n_estimators=100,seed=2)
+        # try random forests, gradient boosting
         model.fit(X_train, y_train)
         
         print('--- Model Evaluation: Iteration '+str(i)+' ---')
@@ -150,7 +155,7 @@ def visualize_tfidf(X_tfidf_all,y_all):
 if __name__ == '__main__':
     text,labels = get_data(path)
     X_tfidf_all,y_all = numericalize_data(text,labels)
-    train_subsamples(X_tfidf_all,y_all,runs=1,ratio=95)
+    train_subsamples(X_tfidf_all,y_all,runs=1,ratio=10)
     #train_upsample(X_tfidf_all,y_all)
     #visualize_tfidf(X_tfidf_all,y_all)
 
