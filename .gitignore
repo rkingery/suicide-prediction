@@ -1,6 +1,7 @@
-./models/*.h5
-./data/*.csv
-./data/lm/models/wt103/*
-./fastai/*
-.ipynb_checkpoints/*
-./data/lm/tmp/*
+**/models/*
+**/data/raw/*
+**/data/processed/*
+**/data/lm/models/wt103/*
+**/fastai/*
+**/.ipynb_checkpoints/*
+**/data/lm/tmp/*

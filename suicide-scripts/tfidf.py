@@ -1,4 +1,4 @@
-import numpy as np
+pimport numpy as np
 import matplotlib.pyplot as plt
 import pandas as pd
 from sklearn.feature_extraction.text import CountVectorizer,TfidfTransformer
@@ -15,6 +15,7 @@ from sklearn.externals import joblib
 from imblearn.over_sampling import SMOTE, ADASYN
 from scipy import sparse
 import xgboost as xgb
+#import shap
 from pathlib import Path
 np.random.seed(42)
 
@@ -33,10 +34,8 @@ def get_data(path):
 
 def numericalize_data(text,labels):
     count_vect = CountVectorizer(max_features=100000)
-    count_vect.fit(text)
     X_counts = count_vect.fit_transform(text)
     tfidf_tr = TfidfTransformer()
-    tfidf_tr.fit(X_counts)
     X_tfidf = tfidf_tr.fit_transform(X_counts)
     y = labels.values
     return X_tfidf,y,count_vect,tfidf_tr
@@ -107,8 +106,7 @@ def train(X_tfidf,y,ratio=1):
     
     return model
     
-def visualize_tfidf(X_tfidf,y):
-    
+def visualize_tfidf(X_tfidf,y):  
     svd = TruncatedSVD(2)
     X_pca = svd.fit_transform(X_tfidf)
     
